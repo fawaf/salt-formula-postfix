@@ -1,0 +1,4 @@
+{%- from "postfix/map.jinja" import server with context %}
+{%- for pattern, address in server.virtual_alias_maps.items() %}
+{{ pattern }}:{{ address }}
+{%- endfor %}

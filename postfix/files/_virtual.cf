@@ -22,11 +22,13 @@ transport_maps = hash:/etc/postfix/transport
 
 {%- include "postfix/files/_ssl.cf" %}
 
+{%- if server.user is defined %}
 # Virtual
 virtual_uid_maps = static:{{ server.user.uid }}
 virtual_gid_maps = static:{{ server.user.gid }}
 virtual_minimum_uid = 100
 virtual_mailbox_base = {{ server.mailbox_base }}
+{%- endif %}
 
 {%- if server.get('dovecot_lmtp', False) %}
 virtual_transport = lmtp:{{ server.dovecot_lmtp.type }}:{{ server.dovecot_lmtp.address }}
@@ -34,6 +36,7 @@ virtual_transport = lmtp:{{ server.dovecot_lmtp.type }}:{{ server.dovecot_lmtp.a
 virtual_transport = virtual
 {%- endif %}
 
+{%- if server.mysql.enabled %}
 # MySQL backend
 virtual_alias_maps =
     mysql:/etc/postfix/mysql_virtual_alias_maps.cf
@@ -43,6 +46,10 @@ virtual_mailbox_domains = mysql:/etc/postfix/mysql_virtual_domains_maps.cf
 virtual_mailbox_maps =
     mysql:/etc/postfix/mysql_virtual_mailbox_maps.cf
     mysql:/etc/postfix/mysql_virtual_alias_domains_maps.cf
+{%- else %}
+virtual_alias_maps = hash:/etc/postfix/virtual
+virtual_mailbox_domains =
+{%- endif %}
 
 virtual_mailbox_limit = 102400000
 
